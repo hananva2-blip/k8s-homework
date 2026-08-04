@@ -8,22 +8,57 @@ on:
 
 jobs:
   lint-and-scan:
+    name: 🛡️ Lint & Security Scan
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # בדיקת תקינות ו-Best Practices עם KubeLinter
       - name: KubeLinter Scan
         uses: stackrox/kube-linter-action@v1
         continue-on-error: true
         with:
           directory: '.'
 
-      # סריקת אבטחה מתקדמת עם Trivy
       - name: Security Scan with Trivy
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'config'
           exit-code: '0'
           severity: 'HIGH,CRITICAL'
+
+  e2e-k8s-test:
+    name: 🧪 E2E K8s Deployment Test
+    needs: lint-and-scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # הרמת Cluster של Kubernetes ברקע (Kind)
+      - name: Create K8s Kind Cluster
+        uses: helm/kind-action@v1.8.0
+        with:
+          cluster_name: ci-cluster
+
+      # בדיקת תקינות ה-Cluster
+      - name: Verify Cluster Readiness
+        run: |
+          kubectl cluster-info
+          kubectl get nodes
+
+      # פריסת כל קובצי ה-YAML למנוע ה-K8s
+      - name: Deploy Manifests
+        run: |
+          kubectl apply -f namespace.yaml
+          kubectl apply -f config-secret.yaml
+          kubectl apply -f rbac.yaml
+          kubectl apply -f deployment.yaml
+          kubectl apply -f services.yaml
+          kubectl apply -f ingress.yaml
+
+      # וידוא שה-Resources נוצרו בהצלחה
+      - name: Validate Deployed Resources
+        run: |
+          kubectl get all -n dev
+          kubectl get ingress -n dev
