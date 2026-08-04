@@ -8,6 +8,24 @@ metadata:
 spec:
   containers:
     - name: app
-      image: nginx
+      image: nginx:1.27.0-alpine
       ports:
         - containerPort: 80
+      env:
+        - name: ENV
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: ENV
+        - name: PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: password
+      resources:
+        requests:
+          memory: "64Mi"
+          cpu: "100m"
+        limits:
+          memory: "128Mi"
+          cpu: "250m"
