@@ -3,8 +3,10 @@ kind: Deployment
 metadata:
   name: app-deployment
   namespace: dev
+  labels:
+    app: demo
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: demo
@@ -15,7 +17,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: nginx
+          image: nginx:1.27.0-alpine
           ports:
             - containerPort: 80
           env:
@@ -29,3 +31,10 @@ spec:
                 secretKeyRef:
                   name: app-secret
                   key: password
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "250m"
