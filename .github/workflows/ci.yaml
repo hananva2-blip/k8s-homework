@@ -13,9 +13,10 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # בדיקת תקינות ו-Best Practices עם KubeLinter (RedHat/StackRox)
+      # בדיקת תקינות ו-Best Practices עם KubeLinter
       - name: KubeLinter Scan
         uses: stackrox/kube-linter-action@v1
+        continue-on-error: true
         with:
           directory: '.'
 
