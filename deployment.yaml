@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-deployment
+  namespace: dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: demo
+  template:
+    metadata:
+      labels:
+        app: demo
+    spec:
+      containers:
+        - name: app
+          image: nginx
+          ports:
+            - containerPort: 80
+          env:
+            - name: ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: ENV
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: password
